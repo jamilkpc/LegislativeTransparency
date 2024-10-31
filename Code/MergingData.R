@@ -123,22 +123,34 @@ x <- data.frame(Country = df2[,2], Naive = x) %>% drop_na
 dfTest <- transparency %>% left_join(x)
 cor(dfTest$LegislativeTransparency, dfTest$Naive)
 
-formula_va_2pl <- bf(value ~ exp(logalpha) * eta,
-                     eta ~ 1 + (1 | indicator) + (1 | country),
-                     logalpha ~ 1 + (1 | indicator),
+write.csv(dfTest,'1PLtransparency.csv')
+
+formula_va_2pl <- bf(value ~ exp(loggamma) * theta + xi,
+                     loggamma ~ 1 + (1 | indicator),
+                     theta ~ 1 + (1 | country),
+                     xi ~ (1 | indicator),
                      nl = TRUE)
 
+irt_priors <- 
+  prior(normal(0, 0.5), class = 'b', nlpar = 'loggamma') +
+  prior(normal(0, 2), class = 'b', nlpar = 'theta') +
+  prior(normal(0, 2), class = 'b', nlpar = 'xi')
+
 fit <- brm(
-  formula_va_2pl, 
+  formula = formula_va_2pl, 
+  prior = irt_priors,
   data = df, 
+  family = bernoulli(link = "probit"),
   chains = 4, 
   cores = 4, 
-  iter = 20000,
+  iter = 10000,
+  seed = 123,
   control = list(adapt_delta = 0.99, max_treedepth = 15)
 )
 
 summary(fit)
-coef(fit)
+#plot(fit)
+#coef(fit)
 x <- coef(fit)
 x <- x$country[,1,1]
 transparency <- data.frame(Country = names(x), LegislativeTransparency2 = x)
@@ -147,3 +159,5 @@ rownames(transparency) <- NULL
 
 dfTest <- dfTest %>% left_join(transparency)
 cor(dfTest$LegislativeTransparency2, dfTest$Naive)
+
+write.csv(dfTest, '2PLtransparency.csv')
