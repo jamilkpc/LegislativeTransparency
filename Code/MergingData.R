@@ -55,21 +55,21 @@ df7 <- df7 %>% mutate(rollcall = case_when(rollcall == 'All' ~ 1,
 
 temp <- read.csv('export-country-compare-8.csv', skip = 17)
 df8 <- temp[,c(1,2,5)]
-colnames(df8) <- c('iso', 'country', 'agendasOnline1')
-df8 <- df8 %>% mutate(agendasOnline1 = case_when(agendasOnline1 == 'All' ~ 1,
-                                               agendasOnline1 == 'Some' ~ 0,
-                                               agendasOnline1 == 'None' ~ 0,
+colnames(df8) <- c('iso', 'country', 'agendasCommittes')
+df8 <- df8 %>% mutate(agendasCommittes = case_when(agendasCommittes == 'All' ~ 1,
+                                                 agendasCommittes == 'Some' ~ 0,
+                                               agendasCommittes == 'None' ~ 0,
                                                .default = NA),
-                      agendasOnline1 = as.integer(agendasOnline1))
+                      agendasCommittes = as.integer(agendasCommittes))
 
 temp <- read.csv('export-country-compare-9.csv', skip = 17)
 df9 <- temp[,c(1,2,5)]
-colnames(df9) <- c('iso', 'country', 'agendasOnline2')
-df9 <- df9 %>% mutate(agendasOnline2 = case_when(agendasOnline2 == 'All' ~ 1,
-                                                 agendasOnline2 == 'Some' ~ 0,
-                                                 agendasOnline2 == 'None' ~ 0,
+colnames(df9) <- c('iso', 'country', 'agendasPlenary')
+df9 <- df9 %>% mutate(agendasPlenary = case_when(agendasPlenary == 'All' ~ 1,
+                                                 agendasPlenary == 'Some' ~ 0,
+                                                 agendasPlenary == 'None' ~ 0,
                                                  .default = NA),
-                      agendasOnline2 = as.integer(agendasOnline2))
+                      agendasPlenary = as.integer(agendasPlenary))
 
 temp <- read.csv('export-country-compare-10.csv', skip = 17)
 df10 <- temp[,c(1,2,5)]
@@ -126,13 +126,13 @@ cor(dfTest$LegislativeTransparency, dfTest$Naive)
 write.csv(dfTest,'1PLtransparency.csv')
 
 formula_va_2pl <- bf(value ~ exp(loggamma) * theta + xi,
-                     loggamma ~ 1 + (1 | indicator),
+                     loggamma ~ 1 + (1 | i | indicator),
                      theta ~ 1 + (1 | country),
-                     xi ~ (1 | indicator),
+                     xi ~ (1 | i | indicator),
                      nl = TRUE)
 
 irt_priors <- 
-  prior(normal(0, 0.5), class = 'b', nlpar = 'loggamma') +
+  prior(normal(0, 1), class = 'b', nlpar = 'loggamma') +
   prior(normal(0, 2), class = 'b', nlpar = 'theta') +
   prior(normal(0, 2), class = 'b', nlpar = 'xi')
 
@@ -152,10 +152,39 @@ summary(fit)
 #plot(fit)
 #coef(fit)
 x <- coef(fit)
+a <- x$indicator
 x <- x$country[,1,1]
 transparency <- data.frame(Country = names(x), LegislativeTransparency2 = x)
 rownames(transparency) <- NULL
 
+aDiff <- data.frame(item = rownames(a[,,1]),a[,,1])
+rownames(aDiff) = NULL
+
+ggplot(aDiff, aes(x = item, y = Estimate)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = Q2.5, ymax = Q97.5), width = 0.2) +
+  coord_flip() +  # Flip coordinates for easier reading
+  labs(
+    title = "Indicator Discrimination",
+    x = "Item",
+    y = "Estimate"
+  ) +
+  theme_minimal()
+
+
+aDiff <- data.frame(item = rownames(a[,,2]),a[,,2])
+rownames(aDiff) = NULL
+
+ggplot(aDiff, aes(x = item, y = Estimate)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = Q2.5, ymax = Q97.5), width = 0.2) +
+  coord_flip() +  # Flip coordinates for easier reading
+  labs(
+    title = "Indicator Easiness",
+    x = "Item",
+    y = "Estimate"
+  ) +
+  theme_minimal()
 
 dfTest <- dfTest %>% left_join(transparency)
 cor(dfTest$LegislativeTransparency2, dfTest$Naive)

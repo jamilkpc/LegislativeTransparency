@@ -29,7 +29,7 @@ ggplot(data = world) +
   )
 
 qog <- read_dta('~/Downloads/qog_std_cs_jan24_stata14.dta') %>% 
-  select(ccodealp, ipu_l_s, wdi_pop, wdi_gdpcappppcon2017) %>% 
+  select(ccodealp, ipu_l_s, wdi_pop, wdi_gdpcappppcon2017,bmr_dem) %>% 
   mutate(proximity = ipu_l_s/wdi_pop^(1/3),
          ipu_l_s = log(ipu_l_s),
          wdi_pop = log(wdi_pop),
@@ -38,7 +38,9 @@ qog <- read_dta('~/Downloads/qog_std_cs_jan24_stata14.dta') %>%
   drop_na
 
 summary(lm(LegislativeTransparency2 ~ proximity, data = qog))
-summary(lm(LegislativeTransparency2 ~ ipu_l_s + wdi_pop, data = qog))
+summary(lm(LegislativeTransparency2 ~ bmr_dem, data = qog))
+summary(lm(LegislativeTransparency2 ~ wdi_lgdppc, data = qog))
+
 
 ggplot(qog, aes(x = proximity, y = LegislativeTransparency2)) +
   geom_point(color = "black", size = 2) +   # Scatter plot points
@@ -50,6 +52,15 @@ ggplot(qog, aes(x = proximity, y = LegislativeTransparency2)) +
   theme_minimal()
 
 ggplot(qog, aes(x = wdi_lgdppc, y = LegislativeTransparency2)) +
+  geom_point(color = "black", size = 2) +   # Scatter plot points
+  geom_smooth(method = "lm", color = "red", se = FALSE) +  # Regression line without confidence interval
+  labs(
+    x = "log(GDPpc)", 
+    y = "Legislative Transparency"
+  ) +
+  theme_minimal()
+
+ggplot(qog, aes(x = bmr_dem, y = LegislativeTransparency2)) +
   geom_point(color = "black", size = 2) +   # Scatter plot points
   geom_smooth(method = "lm", color = "red", se = FALSE) +  # Regression line without confidence interval
   labs(
