@@ -165,12 +165,17 @@ ggplot(aDiff, aes(x = item, y = Estimate)) +
   geom_errorbar(aes(ymin = Q2.5, ymax = Q97.5), width = 0.2) +
   coord_flip() +  # Flip coordinates for easier reading
   labs(
-    title = "Indicator Discrimination",
+    title = "Discrimination",
     x = "Item",
     y = "Estimate"
   ) +
   theme_minimal()
 
+a[,1,1]
+exp(a[,1,1])
+# Roll call and public drafts discriminate more, while FOI law and annual reports inform less.
+a[,1,2]
+# FOI laws and reports are easy to comply with, similarly a channel is also easy
 
 aDiff <- data.frame(item = rownames(a[,,2]),a[,,2])
 rownames(aDiff) = NULL
@@ -180,7 +185,7 @@ ggplot(aDiff, aes(x = item, y = Estimate)) +
   geom_errorbar(aes(ymin = Q2.5, ymax = Q97.5), width = 0.2) +
   coord_flip() +  # Flip coordinates for easier reading
   labs(
-    title = "Indicator Easiness",
+    title = "Easiness",
     x = "Item",
     y = "Estimate"
   ) +
@@ -188,5 +193,7 @@ ggplot(aDiff, aes(x = item, y = Estimate)) +
 
 dfTest <- dfTest %>% left_join(transparency)
 cor(dfTest$LegislativeTransparency2, dfTest$Naive)
+cor(dfTest$LegislativeTransparency2, dfTest$LegislativeTransparency)
+cor(dfTest$LegislativeTransparency, dfTest$Naive)
 
 write.csv(dfTest, '2PLtransparency.csv')

@@ -64,7 +64,7 @@ ggplot(qog, aes(x = bmr_dem, y = LegislativeTransparency2)) +
   geom_point(color = "black", size = 2) +   # Scatter plot points
   geom_smooth(method = "lm", color = "red", se = FALSE) +  # Regression line without confidence interval
   labs(
-    x = "log(GDPpc)", 
+    x = "Democracy", 
     y = "Legislative Transparency"
   ) +
   theme_minimal()
