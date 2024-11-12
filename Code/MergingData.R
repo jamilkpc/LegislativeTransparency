@@ -78,7 +78,22 @@ df10 <- df10 %>% mutate(channel = case_when(channel == 'Yes' ~ 1,
                                             channel == 'No' ~ 0,
                                            .default = NA))
 
+temp <- read.csv('export-country-compare-11.csv', skip = 17)
+df11 <- temp[,c(1,2,5)]
+colnames(df11) <- c('iso', 'country', 'comments')
+df11 <- df11 %>% mutate(comments = case_when(comments == 'Yes' ~ 1,
+                                            comments == 'No' ~ 0,
+                                            .default = NA))
+
+temp <- read.csv('export-country-compare-12.csv', skip = 17)
+df12 <- temp[,c(1,2,5)]
+colnames(df12) <- c('iso', 'country', 'lobbying')
+df12 <- df12 %>% mutate(lobbying = case_when(lobbying == 'Yes' ~ 1,
+                                             lobbying == 'No' ~ 0,
+                                             .default = NA))
+
 df <- df2 %>% 
+  left_join(df11) %>% 
   #left_join(df1) %>% 
   left_join(df3) %>% 
   left_join(df4) %>% 
@@ -88,6 +103,7 @@ df <- df2 %>%
   left_join(df8) %>% 
   left_join(df9) %>% 
   left_join(df10) %>% 
+  left_join(df12) %>% 
   drop_na %>% 
   select(-iso) %>% 
   pivot_longer(
@@ -185,7 +201,7 @@ ggplot(aDiff, aes(x = item, y = Estimate)) +
   geom_errorbar(aes(ymin = Q2.5, ymax = Q97.5), width = 0.2) +
   coord_flip() +  # Flip coordinates for easier reading
   labs(
-    title = "Easiness",
+    title = "Ease to Comply",
     x = "Item",
     y = "Estimate"
   ) +

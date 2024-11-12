@@ -28,21 +28,45 @@ ggplot(data = world) +
     axis.ticks = element_blank()   # Remove axis ticks
   )
 
+ogp <- read.csv('OGP_countries_iso3c.csv') %>% 
+  mutate(ISO3c = 1,
+         ccodealp = countrycode::countrycode(Country,'country.name','iso3c')) %>% 
+  rename(OGP = ISO3c) %>% 
+  select(-Country)
+
 qog <- read_dta('~/Downloads/qog_std_cs_jan24_stata14.dta') %>% 
   select(ccodealp, ipu_l_s, wdi_pop, wdi_gdpcappppcon2017, wdi_internet, bmr_dem) %>% 
   mutate(proximity = ipu_l_s/wdi_pop^(1/3),
          ipu_l_s = log(ipu_l_s),
          wdi_pop = log(wdi_pop),
          wdi_lgdppc = log(wdi_gdpcappppcon2017)) %>% 
-  left_join(df %>% select(ccodealp, LegislativeTransparency2))
+  left_join(df %>% select(ccodealp, LegislativeTransparency2)) %>% 
+  left_join(ogp) %>% 
+  mutate(OGP = replace_na(OGP,0))
 
 summary(lm(LegislativeTransparency2 ~ proximity, data = qog))
+summary(lm(LegislativeTransparency2 ~ ipu_l_s + wdi_pop, data = qog))
+
 summary(lm(LegislativeTransparency2 ~ bmr_dem, data = qog))
+summary(lm(LegislativeTransparency2 ~ OGP, data = qog))
+
 summary(lm(LegislativeTransparency2 ~ wdi_lgdppc, data = qog))
 summary(lm(LegislativeTransparency2 ~ wdi_internet, data = qog))
 
 
-ggplot(qog, aes(x = proximity, y = LegislativeTransparency2)) +
+ggplot(qog %>% mutate(proximity = if_else(proximity < 1.5,proximity,1.5)),
+       aes(x = proximity, y = LegislativeTransparency2)) +
+  geom_point(color = "black", size = 2) +   # Scatter plot points
+  geom_smooth(method = "lm", color = "red", se = FALSE) +  # Regression line without confidence interval
+  labs(
+    x = "Proximity of Representation", 
+    y = "Legislative Transparency"
+  ) +
+  theme_minimal()
+
+
+ggplot(qog,
+       aes(x = proximity, y = LegislativeTransparency2)) +
   geom_point(color = "black", size = 2) +   # Scatter plot points
   geom_smooth(method = "lm", color = "red", se = FALSE) +  # Regression line without confidence interval
   labs(
@@ -78,3 +102,11 @@ ggplot(qog, aes(x = bmr_dem, y = LegislativeTransparency2)) +
   ) +
   theme_minimal()
 
+ggplot(qog, aes(x = OGP, y = LegislativeTransparency2)) +
+  geom_point(color = "black", size = 2) +   # Scatter plot points
+  geom_smooth(method = "lm", color = "red", se = FALSE) +  # Regression line without confidence interval
+  labs(
+    x = "Member of OGP", 
+    y = "Legislative Transparency"
+  ) +
+  theme_minimal()
