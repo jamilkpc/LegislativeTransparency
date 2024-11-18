@@ -44,3 +44,4 @@ cor.test(qog$dj_totalscore,qog$LegislativeTransparency2, use = "complete.obs")
 
 # cor.test(qog$RTI,qog$LegislativeTransparency2, use = "complete.obs")
 
+

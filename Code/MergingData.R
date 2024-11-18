@@ -201,7 +201,7 @@ ggplot(aDiff, aes(x = item, y = Estimate)) +
   geom_errorbar(aes(ymin = Q2.5, ymax = Q97.5), width = 0.2) +
   coord_flip() +  # Flip coordinates for easier reading
   labs(
-    title = "Ease to Comply",
+    title = "Ease",
     x = "Item",
     y = "Estimate"
   ) +

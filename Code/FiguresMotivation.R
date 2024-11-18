@@ -1,6 +1,7 @@
 library(ggplot2)
 library(rnaturalearth)
 library(rnaturalearthdata)
+library(maps)
 library(sf)
 library(tidyverse)
 library(haven)
@@ -15,13 +16,13 @@ df <- read.csv('export-country-compare.csv', skip = 17) %>%
   mutate(ccodealp = countrycode::countrycode(iso,'iso2c','iso3c'))
 
 world <- ne_countries(scale = "medium", returnclass = "sf")
-world <- merge(world, df, by.x = "iso_a3", by.y = "ccodealp", all.x = TRUE)
+world <- merge(world, df, by.x = "iso_a3_eh", by.y = "ccodealp", all.x = TRUE)
 
 ggplot(data = world) +
   geom_sf(aes(fill = LegislativeTransparency2)) +  # Use `value` from your data as fill
   scale_fill_viridis_c(option = "magma", na.value = "lightgrey") +  # Color palette and NA color
   theme_minimal() +  # Clean theme
-  labs(fill = "Transparency Index", title = "Legislative Transparency Map") +
+  labs(fill = "GLIT Index", title = "Global Legislative ICT Transparency") +
   theme(
     panel.grid = element_blank(),  # Remove grid lines
     axis.text = element_blank(),   # Remove axis text
@@ -54,33 +55,12 @@ summary(lm(LegislativeTransparency2 ~ wdi_lgdppc, data = qog))
 summary(lm(LegislativeTransparency2 ~ wdi_internet, data = qog))
 
 
-ggplot(qog %>% mutate(proximity = if_else(proximity < 1.5,proximity,1.5)),
-       aes(x = proximity, y = LegislativeTransparency2)) +
-  geom_point(color = "black", size = 2) +   # Scatter plot points
-  geom_smooth(method = "lm", color = "red", se = FALSE) +  # Regression line without confidence interval
-  labs(
-    x = "Proximity of Representation", 
-    y = "Legislative Transparency"
-  ) +
-  theme_minimal()
-
-
-ggplot(qog,
-       aes(x = proximity, y = LegislativeTransparency2)) +
-  geom_point(color = "black", size = 2) +   # Scatter plot points
-  geom_smooth(method = "lm", color = "red", se = FALSE) +  # Regression line without confidence interval
-  labs(
-    x = "Proximity of Representation", 
-    y = "Legislative Transparency"
-  ) +
-  theme_minimal()
-
 ggplot(qog, aes(x = wdi_lgdppc, y = LegislativeTransparency2)) +
   geom_point(color = "black", size = 2) +   # Scatter plot points
   geom_smooth(method = "lm", color = "red", se = FALSE) +  # Regression line without confidence interval
   labs(
     x = "log(GDPpc)", 
-    y = "Legislative Transparency"
+    y = "GLIT Index"
   ) +
   theme_minimal()
 
@@ -89,7 +69,7 @@ ggplot(qog, aes(x = wdi_internet, y = LegislativeTransparency2)) +
   geom_smooth(method = "lm", color = "red", se = FALSE) +  # Regression line without confidence interval
   labs(
     x = "Internet Access as % of Population", 
-    y = "Legislative Transparency"
+    y = "GLIT Index"
   ) +
   theme_minimal()
 
@@ -98,7 +78,7 @@ ggplot(qog, aes(x = bmr_dem, y = LegislativeTransparency2)) +
   geom_smooth(method = "lm", color = "red", se = FALSE) +  # Regression line without confidence interval
   labs(
     x = "Democracy", 
-    y = "Legislative Transparency"
+    y = "GLIT Index"
   ) +
   theme_minimal()
 
@@ -107,6 +87,6 @@ ggplot(qog, aes(x = OGP, y = LegislativeTransparency2)) +
   geom_smooth(method = "lm", color = "red", se = FALSE) +  # Regression line without confidence interval
   labs(
     x = "Member of OGP", 
-    y = "Legislative Transparency"
+    y = "GLIT Index"
   ) +
   theme_minimal()
