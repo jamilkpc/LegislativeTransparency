@@ -132,7 +132,7 @@ x <- x$country[,1,1]
 transparency <- data.frame(Country = names(x), LegislativeTransparency = x)
 rownames(transparency) <- NULL
 
-x <- (df2[,3] + df3[,3] + df4[,3] + df5[,3] + df7[,3] + df8[,3] + df9[,3] + df10[,3])/8
+x <- (df2[,3] + df3[,3] + df4[,3] + df5[,3] + df7[,3] + df8[,3] + df9[,3] + df10[,3] + df11[,3] + df12[,3])/10
 x <- data.frame(Country = df2[,2], Naive = x) %>% drop_na
 
 
@@ -201,7 +201,7 @@ ggplot(aDiff, aes(x = item, y = Estimate)) +
   geom_errorbar(aes(ymin = Q2.5, ymax = Q97.5), width = 0.2) +
   coord_flip() +  # Flip coordinates for easier reading
   labs(
-    title = "Ease",
+    title = "Ease of Compliance",
     x = "Item",
     y = "Estimate"
   ) +
