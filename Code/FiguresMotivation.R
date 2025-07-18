@@ -35,6 +35,14 @@ ogp <- read.csv('OGP_countries_iso3c.csv') %>%
   rename(OGP = ISO3c) %>% 
   select(-Country)
 
+dfVdem <- vdemdata::vdem %>%
+  select(country_text_id, year, v2xps_party) %>% 
+  rename(ccodealp = country_text_id) %>% 
+  filter(year==2020) %>%
+  select(-year) %>% 
+  drop_na
+
+
 qog <- read_dta('~/Downloads/qog_std_cs_jan24_stata14.dta') %>% 
   select(ccodealp, ipu_l_s, wdi_pop, wdi_gdpcappppcon2017, wdi_internet, bmr_dem) %>% 
   mutate(proximity = ipu_l_s/wdi_pop^(1/3),
@@ -43,13 +51,14 @@ qog <- read_dta('~/Downloads/qog_std_cs_jan24_stata14.dta') %>%
          wdi_lgdppc = log(wdi_gdpcappppcon2017)) %>% 
   left_join(df %>% select(ccodealp, LegislativeTransparency2)) %>% 
   left_join(ogp) %>% 
-  mutate(OGP = replace_na(OGP,0))
+  mutate(OGP = replace_na(OGP,0)) %>% 
+  left_join(dfVdem)
 
 summary(lm(LegislativeTransparency2 ~ proximity, data = qog))
 summary(lm(LegislativeTransparency2 ~ ipu_l_s + wdi_pop, data = qog))
 
 summary(lm(LegislativeTransparency2 ~ bmr_dem, data = qog))
-summary(lm(LegislativeTransparency2 ~ OGP, data = qog))
+summary(lm(LegislativeTransparency2 ~ v2xps_party, data = qog))
 
 summary(lm(LegislativeTransparency2 ~ wdi_lgdppc, data = qog))
 summary(lm(LegislativeTransparency2 ~ wdi_internet, data = qog))
@@ -62,7 +71,7 @@ ggplot(qog, aes(x = wdi_lgdppc, y = LegislativeTransparency2)) +
     x = "log(GDPpc)", 
     y = "GLIT Index"
   ) +
-  theme_minimal()
+  theme_minimal(base_size = 14)
 
 ggplot(qog, aes(x = wdi_internet, y = LegislativeTransparency2)) +
   geom_point(color = "black", size = 2) +   # Scatter plot points
@@ -71,7 +80,7 @@ ggplot(qog, aes(x = wdi_internet, y = LegislativeTransparency2)) +
     x = "Internet Access as % of Population", 
     y = "GLIT Index"
   ) +
-  theme_minimal()
+  theme_minimal(base_size = 14)
 
 ggplot(qog, aes(x = bmr_dem, y = LegislativeTransparency2)) +
   geom_point(color = "black", size = 2) +   # Scatter plot points
@@ -80,7 +89,7 @@ ggplot(qog, aes(x = bmr_dem, y = LegislativeTransparency2)) +
     x = "Democracy", 
     y = "GLIT Index"
   ) +
-  theme_minimal()
+  theme_minimal(base_size = 14)
 
 ggplot(qog, aes(x = OGP, y = LegislativeTransparency2)) +
   geom_point(color = "black", size = 2) +   # Scatter plot points
@@ -89,4 +98,5 @@ ggplot(qog, aes(x = OGP, y = LegislativeTransparency2)) +
     x = "Member of OGP", 
     y = "GLIT Index"
   ) +
-  theme_minimal()
+  theme_minimal(base_size = 14)
+
